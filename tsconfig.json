@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "alwaysStrict": true,
+        "declaration": true,
+        "declarationDir": "dist/types",
+        "emitDeclarationOnly": true,
+        "jsx": "react",
+        "target": "es6",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "newLine": "LF",
+        "strict": true,
+    }
+}
