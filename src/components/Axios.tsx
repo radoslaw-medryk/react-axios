@@ -1,19 +1,27 @@
 import * as React from "react";
-import { AxiosRequest } from "../interfaces/AxiosRequest";
-import { AxiosContext, AxiosStatus } from "../interfaces/AxiosContext";
+import { AxiosRequest } from "../types/AxiosRequest";
+import { AxiosContext, AxiosStatus } from "../types/AxiosContext";
 import axios, { CancelTokenSource } from "axios";
 
-export interface AxiosProps {
-    request: AxiosRequest;
+type ResponseType = {
+    //
+};
+
+type ErrorType = {
+    //
+};
+
+export type AxiosProps = {
+    request: AxiosRequest<ResponseType>;
     initCall?: boolean;
     onCallEnded?: () => void;
     children: (context: AxiosContext) => JSX.Element;
-}
+};
 
-export interface AxiosState extends AxiosContext {
+export type AxiosState = AxiosContext<ResponseType, ErrorType> & {
     requestId: number;
     cts: CancelTokenSource | null;
-}
+};
 
 export class Axios extends React.Component<AxiosProps, AxiosState> {
     constructor(props: AxiosProps) {
@@ -54,7 +62,7 @@ export class Axios extends React.Component<AxiosProps, AxiosState> {
         this.setState(state => ({ requestId: state.requestId + 1 }));
     }
 
-    private executeCall = async () => {
+    private executeCall = () => {
         this.cancelCall();
         const cts = axios.CancelToken.source();
         this.setState({
@@ -67,20 +75,20 @@ export class Axios extends React.Component<AxiosProps, AxiosState> {
         const axiosInstance = axios.create({
             cancelToken: cts.token,
         });
-        try {
-            const response = await this.props.request(axiosInstance);
+
+        this.props.request(axiosInstance).then(response => {
             this.setState({
                 status: AxiosStatus.Success,
                 data: response,
                 error: null,
             }, this.props.onCallEnded);
-        } catch (error) {
+        }).catch(error => {
             this.setState({
                 status: AxiosStatus.Error,
                 data: null,
                 error: error,
             }, this.props.onCallEnded);
-        }
+        });
     }
 
     private cancelCall = () => {
